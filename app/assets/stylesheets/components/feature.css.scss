@@ -1,0 +1,63 @@
+@import "compass/css3/box-sizing";
+$feature-background-color: $light-grey;
+
+.feature {
+  background: $feature-background-color;
+  margin-bottom: $default-margin;
+  position: relative;
+  padding: 0;
+  min-height: 350px;
+  line-height: 1.5;
+
+  h2 {
+    text-align: center;
+    padding: $default-margin/2 0;
+    margin: 0;
+  }
+
+  pre {
+    margin-top: 10px;
+  }
+  p {
+    padding: $default-margin/2 $default-margin;
+  }
+
+  &.three {
+    p {
+      min-height: 69px;
+    }
+  }
+
+  .btn {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    right: 20px;
+  }
+  a.btn {
+    text-align: center;
+    display: block;
+  }
+
+  form {
+    padding: 0 20px;
+  }
+
+  input[type=submit] {
+    padding-top: 15px;
+    padding-bottom: 15px;
+    margin: 0;
+  }
+
+  textarea {
+    width: 100%;
+    height: 195px;
+    margin-top: 10px;
+    margin-bottom: 20px;
+    border: 1px solid $medium-grey;
+    resize: none;
+    box-sizing: border-box;
+    font-family: $fixed-width-font;
+    @include box-sizing(border-box);
+  }
+}

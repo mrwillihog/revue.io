@@ -1,0 +1,104 @@
+$border-color: $medium-grey;
+$border-color-light: lighten($border-color, 7%);
+$additional-line-color: #ddffdd;
+$deletion-line-color: #FFDDDD;
+$line-color: #FAFAFF;
+$chunk-line-color: darken(desaturate($line-color, 80%), 4%);
+
+.review {
+  .brand {
+    h1 {
+      a {
+        font-size: 1.5em;
+        font-weight: 600;
+        @include icons-sprite(revue-small);
+        @include hide-text;
+        width: icons-sprite-width(revue-small);
+        height: icons-sprite-height(revue-small);
+      }
+    }
+  }
+}
+
+.diff {
+  margin-bottom: $default-margin * 2;
+  border: 1px solid $border-color;
+  overflow-x: scroll;
+  color: $base-font-color;
+}
+
+.diff_bar {
+  height: 10px;
+  background-color: darken($additional-line-color, 10%);
+  margin: 0 5px;
+  position: relative;
+  .deleted_lines {
+    background-color: darken($deletion-line-color, 10%);
+    position: absolute;
+    right: 0;
+    height: 10px;
+    &.none {
+      left: 100%;
+    }
+    &.full {
+      left: 0;
+    }
+    &.half {
+      left: 50%;
+    }
+    &.quarter {
+      left: 75%;
+    }
+    &.three_quarters {
+      left: 25%;
+    }
+  }
+}
+
+thead {
+  background-color: $light-grey;
+  font-family: $body-font;
+  td.meta {
+    padding: $default-margin;
+    font-size: 1em;
+    padding-top: 18px;
+    font-weight: bold;
+  }
+  border-bottom: 1px solid $border-color-light;
+}
+
+.chunk_separator {
+  background-color: $chunk-line-color;
+}
+
+
+.line {
+  background-color: $line-color;
+}
+.addition {
+  background-color: $additional-line-color;
+}
+.deletion {
+  background-color: $deletion-line-color;
+}
+
+.line_content {
+  padding: 5px $default-margin;
+  white-space: pre;
+}
+
+.line_number {
+  background-color: $light-grey;
+  padding: 5px 8px;
+  text-align: right;
+  font-size: 0.8em;
+  min-width: 8px;
+  &.modified {
+    border-left: 1px solid $border-color-light;
+    border-right: 1px solid $border-color-light;
+  }
+}
+
+.line_content {
+  width: 100%;
+}

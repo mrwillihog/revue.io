@@ -1,0 +1,33 @@
+.exception {
+  margin-top: 30px;
+  background: $light-grey;
+  text-align: center;
+  line-height: 1.5;
+  >div {
+    padding: 60px 20px;
+  }
+  h1 {
+    margin: 0 auto;
+    margin-bottom: 20px;
+    @include hide-text;
+    @include icons-sprite(revue-eyes);
+    width: icons-sprite-width(revue-eyes);
+    height: icons-sprite-height(revue-eyes);
+  }
+}
+
+.error {
+  background-color: $pomegranate;
+  padding: 20px;
+  color: white;
+  text-align: center;
+  width: 100%;
+  margin-top: -5px;
+  z-index: 10000;
+}
+
+.error-state {
+  header {
+    display: none;
+  }
+}

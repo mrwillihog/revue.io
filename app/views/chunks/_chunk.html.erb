@@ -1,0 +1,12 @@
+<tr class="chunk_separator">
+  <td class="line_number original"><%= "..." if chunk.original_line_number > 1 %></td>
+  <td class="line_number modified"><%= "..." if chunk.modified_line_number > 1 %></td>
+  <td class="line_content chunk_header"><%= chunk.header %></td>
+</tr>
+<% chunk.lines.each do |line| %>
+  <tr class="line <%= "addition" if line.addition? %><%= "deletion" if line.deletion? %>">
+    <td class="line_number original"><%= line.original_line_number %></td>
+    <td class="line_number modified"><%= line.modified_line_number %></td>
+    <td class="line_content"><%= line.raw %></td>
+  </tr>
+<% end -%>

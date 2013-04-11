@@ -1,0 +1,21 @@
+Index: File1
+===================================================================
+--- File1	(revision 815)
++++ File1a	(working copy)
+@@ -1 +1 @@
+-testing1
++tester1
+Index: File2
+===================================================================
+--- File2	(revision 815)
++++ File2b	(working copy)
+@@ -1 +1 @@
+-testing2
++tester2
+Index: File3
+===================================================================
+--- File3	(revision 815)
++++ File3c	(working copy)
+@@ -1 +1 @@
+-testing3
++tester3

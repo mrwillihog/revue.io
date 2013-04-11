@@ -1,0 +1,8 @@
+<% content_for :body_class, "review" %>
+<% content_for :header do %>
+  <div class="expiry">
+    <strong>Expires:</strong>
+    in <%= time_ago_in_words @review.expires_at %>
+  </div>
+<% end -%>
+<%= render partial: 'diffs/diff', collection: @review.diffs %>

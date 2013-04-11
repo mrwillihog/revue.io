@@ -1,0 +1,14 @@
+@@ -21,12 +21,7 @@ public class HideMousePointerCommand extends SignalCommand
+ 
+     override public function execute():void
+     {
+-        if (shouldHideMousePointer) mouse.hide()
+-    }
+-
+-    private function get shouldHideMousePointer():Boolean
+-    {
+-        return (stage.isFullScreen && mouse.visible)
++        if (stage.isFullScreen) mouse.hide()
+     }
+ }
+ }

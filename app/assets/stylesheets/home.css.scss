@@ -1,0 +1,56 @@
+.file-preview {
+  display: none;
+}
+
+header {
+  h1 {
+    a {
+      @include hide-text;
+      @include icons-sprite(revue-large);
+      height: icons-sprite-height(revue-large);
+      width: icons-sprite-width(revue-large);
+      display: block;
+    }
+  }
+}
+form {
+  input[type=submit] {
+    cursor: pointer;
+  }
+}
+
+footer {
+  h3 {
+    display: inline-block;
+    *display: inline;
+    @include icons-sprite(revue-white);
+    width: icons-sprite-width(revue-white);
+    height: icons-sprite-height(revue-white);
+    @include hide-text;
+  }
+  ul {
+    display: inline;
+    font-size: 0.9em;
+    margin: 20px 30px;
+    li {
+      display: inline;
+      padding: 0 10px;
+      border-left: 1px solid white;
+      margin-top: 10px;
+      &:first-child {
+        border-left: none;
+      }
+    }
+  }
+  a {
+    color: white;
+    text-decoration: none;
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+  .extra {
+    display: none;
+    @include at-breakpoint($bp2) { display: inline; }
+  }
+}

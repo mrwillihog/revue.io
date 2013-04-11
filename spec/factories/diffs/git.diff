@@ -1,0 +1,474 @@
+diff --git a/app/controllers/api/v1/code_reviews_controller.rb b/app/controllers/api/v1/code_reviews_controller.rb
+index 6c5741b..07df5b4 100644
+--- a/app/controllers/api/v1/code_reviews_controller.rb
++++ b/app/controllers/api/v1/code_reviews_controller.rb
+@@ -1,24 +1,24 @@
+ module Api
+   module V1
+     class CodeReviewsController < ApplicationController
+       respond_to :json
+ 
+       def create
+         @review = CodeReview.create raw: params[:content]
+         render :json => {
+           url: code_review_path(@review),
+           expires_at: @review.expires_at
+         }
+       end
+ 
+       def show
+-        @review = CodeReview.not_expired.find_by_secure_hash! params[:id]
++        @review = CodeReview.not_expired.find_by_token! params[:id]
+         sleep 0.5 and raise ActiveRecord::RecordNotFound if @review.nil?
+         render :json => {
+           content: @review.raw,
+           expires_at: @review.expires_at
+         }
+       end
+     end
+   end
+ end
+\ No newline at end of file
+diff --git a/app/controllers/code_reviews_controller.rb b/app/controllers/code_reviews_controller.rb
+index 1cdd582..93973d6 100644
+--- a/app/controllers/code_reviews_controller.rb
++++ b/app/controllers/code_reviews_controller.rb
+@@ -1,16 +1,16 @@
+ class CodeReviewsController < ApplicationController
+   def index
+     @review = CodeReview.not_expired.first
+   end
+   def show
+-    @review = CodeReview.not_expired.find_by_secure_hash(params[:id])
++    @review = CodeReview.not_expired.find_by_token(params[:id])
+     sleep 0.5 and raise ActiveRecord::RecordNotFound if @review.nil?
+   end
+   def create
+     @review = CodeReview.create! raw: params[:file].read
+     respond_to do |format|
+       format.html { redirect_to code_review_path(@review) }
+       format.json
+     end
+   end
+ end
+\ No newline at end of file
+diff --git a/app/models/code_review.rb b/app/models/code_review.rb
+index 202c49a..21eee00 100644
+--- a/app/models/code_review.rb
++++ b/app/models/code_review.rb
+@@ -1,35 +1,35 @@
+ class CodeReview < ActiveRecord::Base
+-  DIFF_PATTERN = /^(--- .*?)(?=index|\Z)/mi
+-  attr_accessible :raw, :secure_hash, :time_to_live
++  DIFF_PATTERN = /^(--- .*?)(?=^index|diff --git|\Z)/mi
++  attr_accessible :raw, :token
+ 
+   before_create :generate_hash, :set_expires_at
+ 
+   scope :expired, lambda { where("expires_at < ?", Time.now) }
+   scope :not_expired, lambda { where("expires_at >= ?",  Time.now) }
+ 
+   def diffs
+     # Scan raw text for separate diffs and map to an array containing Diff objects
+     @diffs ||= raw.scan(DIFF_PATTERN).map { |c| Revue::Diff.new(c[0]) }
+   end
+ 
+   def to_param
+-    secure_hash
++    token
+   end
+ 
+   def self.from_param(param)
+-    find_by_secure_hash!(param)
++    find_by_token!(param)
+   end
+ 
+ private
+ 
+   def generate_hash
+-    self.secure_hash = loop do
++    self.token = loop do
+       random_token = SecureRandom.urlsafe_base64
+-      break random_token unless CodeReview.where(secure_hash: random_token).exists?
++      break random_token unless CodeReview.where(token: random_token).exists?
+     end
+   end
+ 
+   def set_expires_at
+     self.expires_at = Time.now + 6.hours
+   end
+ end
+diff --git a/config/application.rb b/config/application.rb
+index 310f725..ad002a6 100644
+--- a/config/application.rb
++++ b/config/application.rb
+@@ -26,41 +26,41 @@ module RevueIo
+ 
+     # Only load the plugins named here, in the order given (default is alphabetical).
+     # :all can be used as a placeholder for all plugins not explicitly named.
+     # config.plugins = [ :exception_notification, :ssl_requirement, :all ]
+ 
+     # Activate observers that should always be running.
+     # config.active_record.observers = :cacher, :garbage_collector, :forum_observer
+ 
+     # Set Time.zone default to the specified zone and make Active Record auto-convert to this zone.
+     # Run "rake -D time" for a list of tasks for finding time zone names. Default is UTC.
+     # config.time_zone = 'Central Time (US & Canada)'
+ 
+     # The default locale is :en and all translations from config/locales/*.rb,yml are auto loaded.
+     # config.i18n.load_path += Dir[Rails.root.join('my', 'locales', '*.{rb,yml}').to_s]
+     # config.i18n.default_locale = :de
+ 
+     # Configure the default encoding used in templates for Ruby 1.9.
+     config.encoding = "utf-8"
+ 
+     # Configure sensitive parameters which will be filtered from the log file.
+-    config.filter_parameters += [:password, :secure_hash]
++    config.filter_parameters += [:password, :token]
+ 
+     # Enable escaping HTML in JSON.
+     config.active_support.escape_html_entities_in_json = true
+ 
+     # Use SQL instead of Active Record's schema dumper when creating the database.
+     # This is necessary if your schema can't be completely dumped by the schema dumper,
+     # like if you have constraints or database-specific column types
+     # config.active_record.schema_format = :sql
+ 
+     # Enforce whitelist mode for mass assignment.
+     # This will create an empty whitelist of attributes available for mass-assignment for all models
+     # in your app. As such, your models will need to explicitly whitelist or blacklist accessible
+     # parameters by using an attr_accessible or attr_protected declaration.
+     config.active_record.whitelist_attributes = true
+ 
+     # Enable the asset pipeline
+     config.assets.enabled = true
+ 
+     # Version of your assets, change this if you want to expire all your assets
+     config.assets.version = '1.0'
+diff --git a/db/migrate/20130327074605_add_secure_hash_to_code_review.rb b/db/migrate/20130327074605_add_secure_hash_to_code_review.rb
+deleted file mode 100644
+index 37ee8ff..0000000
+--- a/db/migrate/20130327074605_add_secure_hash_to_code_review.rb
++++ /dev/null
+@@ -1,5 +0,0 @@
+-class AddSecureHashToCodeReview < ActiveRecord::Migration
+-  def change
+-    add_column :code_reviews, :secure_hash, :string
+-  end
+-end
+diff --git a/db/migrate/20130327175828_add_time_to_live_to_code_review.rb b/db/migrate/20130327175828_add_time_to_live_to_code_review.rb
+deleted file mode 100644
+index ed5ad4a..0000000
+--- a/db/migrate/20130327175828_add_time_to_live_to_code_review.rb
++++ /dev/null
+@@ -1,5 +0,0 @@
+-class AddTimeToLiveToCodeReview < ActiveRecord::Migration
+-  def change
+-    add_column :code_reviews, :time_to_live, :time
+-  end
+-end
+diff --git a/db/migrate/20130327201743_add_secure_hash_index_to_code_review.rb b/db/migrate/20130327201743_add_secure_hash_index_to_code_review.rb
+deleted file mode 100644
+index f8c8b70..0000000
+--- a/db/migrate/20130327201743_add_secure_hash_index_to_code_review.rb
++++ /dev/null
+@@ -1,5 +0,0 @@
+-class AddSecureHashIndexToCodeReview < ActiveRecord::Migration
+-  def change
+-    add_index(:code_reviews, :secure_hash, unique: true)
+-  end
+-end
+diff --git a/db/schema.rb b/db/schema.rb
+index d075ced..f975e8f 100644
+--- a/db/schema.rb
++++ b/db/schema.rb
+@@ -1,27 +1,26 @@
+ # encoding: UTF-8
+ # This file is auto-generated from the current state of the database. Instead
+ # of editing this file, please use the migrations feature of Active Record to
+ # incrementally modify your database, and then regenerate this schema definition.
+ #
+ # Note that this schema.rb definition is the authoritative source for your
+ # database schema. If you need to create the application database on another
+ # system, you should be using db:schema:load, not running all the migrations
+ # from scratch. The latter is a flawed and unsustainable approach (the more migrations
+ # you'll amass, the slower it'll run and the greater likelihood for issues).
+ #
+ # It's strongly recommended to check this file into your version control system.
+ 
+ ActiveRecord::Schema.define(:version => 20130327201743) do
+ 
+   create_table "code_reviews", :force => true do |t|
+     t.text     "raw"
+-    t.datetime "created_at",   :null => false
+-    t.datetime "updated_at",   :null => false
+-    t.string   "secure_hash"
+-    t.time     "time_to_live"
++    t.datetime "created_at", :null => false
++    t.datetime "updated_at", :null => false
++    t.string   "token"
+     t.datetime "expires_at"
+   end
+ 
+-  add_index "code_reviews", ["secure_hash"], :name => "index_code_reviews_on_secure_hash", :unique => true
++  add_index "code_reviews", ["token"], :name => "index_code_reviews_on_token", :unique => true
+ 
+ end
+diff --git a/features/security/secure_hashing.feature b/features/security/secure_hashing.feature
+deleted file mode 100644
+index c365a3a..0000000
+--- a/features/security/secure_hashing.feature
++++ /dev/null
+@@ -1,22 +0,0 @@
+-Feature: Secure hashing
+-
+-  As a security-conscious uploader
+-  I want my code review obscured by a hash
+-  So that it is extremely difficult for unwanted users to find it
+-
+-  @slow
+-  Scenario: a review is not accessible by its ID
+-
+-    By default each code review will have a unique ID. It should not be possible
+-    to access a code review by browsing to '/:id'
+-
+-    Given a simple review
+-    Then I should not be able to access it at '/:id'
+-
+-  Scenario: a review is accessible by its secure hash
+-
+-    All code reviews should be accessible via their secure hash. E.g:
+-    '/:secure_hash'
+-
+-    Given a simple review
+-    Then I should be able to access it at '/:secure_hash'
+\ No newline at end of file
+diff --git a/features/step_definitions/api/get_steps.rb b/features/step_definitions/api/get_steps.rb
+index 6cbfadf..2d2d9a2 100644
+--- a/features/step_definitions/api/get_steps.rb
++++ b/features/step_definitions/api/get_steps.rb
+@@ -1,22 +1,22 @@
+ When(/^I try to get it via the API$/) do
+-  get "/api/v1/#{@review.secure_hash}.json"
++  get "/api/v1/#{@review.token}.json"
+ end
+ 
+ Then(/^I should recieve the diff content$/) do
+   response = JSON.parse(last_response.body)
+   response['content'].should have_content(@review.raw)
+ end
+ 
+ Then(/^I should recieve the expiry date$/) do
+   response = JSON.parse(last_response.body)
+   response['expires_at'].should_not be_nil
+ end
+ 
+ Then(/^I should experience a half second delay before I get a 404 response from the API$/) do
+   start_time = Time.now
+   expect {
+-    get "/api/v1/#{@review.secure_hash}.json"
++    get "/api/v1/#{@review.token}.json"
+   }.to raise_error(ActiveRecord::RecordNotFound)
+   end_time  = Time.now
+   (end_time - start_time).should >= 0.5.seconds
+ end
+\ No newline at end of file
+diff --git a/features/step_definitions/security/secure_hash_steps.rb b/features/step_definitions/security/secure_hash_steps.rb
+deleted file mode 100644
+index 919f01f..0000000
+--- a/features/step_definitions/security/secure_hash_steps.rb
++++ /dev/null
+@@ -1,14 +0,0 @@
+-When(/^I try to navigate to \/:id$/) do
+-end
+-
+-Then(/^I should not be able to access it at '\/:id'$/) do
+-  expect {
+-    visit "/#{@review.id}"
+-  }.to raise_error(ActiveRecord::RecordNotFound)
+-end
+-
+-Then(/^I should be able to access it at '\/:secure_hash'$/) do
+-  expect {
+-    visit "/#{@review.secure_hash}"
+-  }.not_to raise_error
+-end
+\ No newline at end of file
+diff --git a/features/step_definitions/security/sleepy_responses.rb b/features/step_definitions/security/sleepy_responses.rb
+index 67d5f87..6bde5af 100644
+--- a/features/step_definitions/security/sleepy_responses.rb
++++ b/features/step_definitions/security/sleepy_responses.rb
+@@ -1,20 +1,20 @@
+ Then(/^I should not experience a delay when I view it$/) do
+   start_time = Time.now
+   visit code_review_path(@review)
+   end_time = Time.now
+   (end_time - start_time).should <= 0.5.seconds
+ end
+ 
+ Given(/^I guess a hash$/) do
+   @review = FactoryGirl.build :simple
+-  @review.secure_hash = SecureRandom.urlsafe_base64
++  @review.token = SecureRandom.urlsafe_base64
+ end
+ 
+ Then(/^I should experience a half second delay before I get a 404 response$/) do
+   start_time = Time.now
+   expect {
+     visit code_review_path(@review)
+   }.to raise_error(ActiveRecord::RecordNotFound)
+   end_time  = Time.now
+   (end_time - start_time).should >= 0.5.seconds
+ end
+\ No newline at end of file
+diff --git a/features/viewing/splitting_into_diffs.feature b/features/viewing/splitting_into_diffs.feature
+index 069993f..5b2e5ca 100644
+--- a/features/viewing/splitting_into_diffs.feature
++++ b/features/viewing/splitting_into_diffs.feature
+@@ -1,19 +1,26 @@
++@run
+ Feature: Splitting a code review into multiple diffs
+ 
+   As a reviewer
+   I want to see each diff in its own section
+   So that I can easily navigate between modified files
+ 
+   Scenario: A simple review
+ 
+     A simple review is defined as a review with a single diff
+ 
+     Given a simple review
+     When I am reviewing it
+     Then I should see 1 diff section
+ 
+   Scenario: A review with multiple diffs
+ 
+     Given a multiple diffs review
+     When I am reviewing it
+-    Then I should see 3 diff sections
+\ No newline at end of file
++    Then I should see 3 diff sections
++
++  Scenario: A review from git
++
++    Given a git review
++    When I am reviewing it
++    Then I should see 13 diff sections
+\ No newline at end of file
+diff --git a/lib/revue/diff.rb b/lib/revue/diff.rb
+index 3557d7c..67b825e 100644
+--- a/lib/revue/diff.rb
++++ b/lib/revue/diff.rb
+@@ -1,24 +1,24 @@
+ require 'revue/chunk'
+ module Revue
+   class Diff
+-    FILE_PATTERN = /(.*)\t'{2}?(.*)'{2}?/
++    FILE_PATTERN = /(.*)(?:\t'{2}?(.*)'{2}){1}?/
+     ORIGINAL_FILENAME_PATTERN = /--- #{FILE_PATTERN}/
+     MODIFIED_FILENAME_PATTERN = /\+\+\+ #{FILE_PATTERN}/
+     CHUNK_PATTERN = /^(@@.*?)(?=\n@@|\Z)/mi
+ 
+     attr_accessor :raw
+     attr_reader :original_filename, :modified_filename, :original_revision,
+                 :modified_revision, :chunks
+ 
+     def initialize(raw)
+       @raw = raw
+       parse
+     end
+ 
+     def number_of_added_lines
+       @number_of_added_lines ||= @raw.scan(Revue::Chunk::ADDED_PATTERN).size
+     end
+ 
+     def number_of_deleted_lines
+       @number_of_deleted_lines ||= @raw.scan(Revue::Chunk::REMOVED_PATTERN).size
+     end
+diff --git a/spec/factories/review_factory.rb b/spec/factories/review_factory.rb
+index b963ffc..d7448a2 100644
+--- a/spec/factories/review_factory.rb
++++ b/spec/factories/review_factory.rb
+@@ -19,22 +19,26 @@ FactoryGirl.define do
+ 
+     factory :new_file do |f|
+       f.raw read_diff_file "new_file.diff"
+     end
+ 
+     factory :removed_file do |f|
+       f.raw read_diff_file "removed_file.diff"
+     end
+ 
+     factory :modified_filename do |f|
+       f.raw read_diff_file "modified_filename.diff"
+     end
+ 
+     factory :commit_revision do |f|
+       f.raw read_diff_file "commit_revision.diff"
+     end
+ 
+     factory :more_additions do |f|
+       f.raw read_diff_file "more_additions.diff"
+     end
++
++    factory :git do |f|
++      f.raw read_diff_file "git.diff"
++    end
+   end
+ end
+\ No newline at end of file
+diff --git a/spec/models/code_review_spec.rb b/spec/models/code_review_spec.rb
+index 063813d..c1f8bcc 100644
+--- a/spec/models/code_review_spec.rb
++++ b/spec/models/code_review_spec.rb
+@@ -8,43 +8,43 @@ describe CodeReview do
+ 
+       it "returns a single diff" do
+         review.diffs.length.should == 1
+       end
+     end
+ 
+     context "A code review with multiple diffs" do
+       let(:review) { FactoryGirl.build :multiple_diffs }
+ 
+       it "returns the correct number of diffs" do
+         review.diffs.length.should == 3
+       end
+     end
+   end
+ 
+   describe "#to_param" do
+     let(:review) { FactoryGirl.create :simple }
+     it "does not return the id" do
+       review.to_param.should_not == review.id.to_s
+     end
+-    it "returns the secure hash" do
+-      review.to_param.should == review.secure_hash
++    it "returns the token" do
++      review.to_param.should == review.token
+     end
+   end
+ 
+   describe ".from_param" do
+     let(:review) { FactoryGirl.create :simple }
+-    it "finds a code review from its secure hash" do
+-      CodeReview.from_param(review.secure_hash).should == review
++    it "finds a code review from its token" do
++      CodeReview.from_param(review.token).should == review
+     end
+   end
+ 
+-  describe "#secure_hash" do
++  describe "#token" do
+     let(:review) { FactoryGirl.create :simple }
+     it "is 22 characters long" do
+-      review.secure_hash.length.should == 22
++      review.token.length.should == 22
+     end
+     it "is unique" do
+       new_review = FactoryGirl.create :simple
+-      new_review.secure_hash.should_not == review.secure_hash
++      new_review.token.should_not == review.token
+     end
+   end
+ end

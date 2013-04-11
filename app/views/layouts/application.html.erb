@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>revue | an online diff viewer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <%= stylesheet_link_tag    "application", :media => "all" %>
+    <%= csrf_meta_tags %>
+  </head>
+  <body class="<%= yield :body_class %>">
+    <% if flash[:error] %>
+      <div class="error"><%= flash[:error] %></div>
+    <% else %>
+      <section class="stripe"></section>
+    <% end -%>
+    <section class="main">
+      <div class="grid">
+        <header class="brand">
+          <h1>
+            <a href="<%= code_reviews_path %>">
+              revue ಠ̯ಠ
+            </a>
+          </h1>
+          <%= yield :header %>
+        </header>
+        <div class="content">
+          <%= yield %>
+        </div>
+      </div>
+    </section>
+    <footer>
+      <div class="grid">
+        <div class="full">
+          <h3>revue ಠ̯ಠ</h3>
+          <ul>
+            <li>
+              <a href="https://github.com/mrwillihog/revue.io"><span class="extra">view </span>source code</a>
+            </li>
+            <li>
+              <%= link_to_revue_gem do %>
+                <span class="extra">download </span>gem</a>
+              <% end -%>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

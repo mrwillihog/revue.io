@@ -1,0 +1,17 @@
+<section class="diff full">
+  <table class="diff_content">
+    <thead>
+      <tr>
+        <td colspan=2>
+          <%= diff_bar(diff) %>
+        </td>
+        <td class="meta filename">
+          <%= diff.original_filename %>
+        </td>
+      </tr>
+    </thead>
+    <tbody>
+      <%= render partial: 'chunks/chunk', collection: diff.chunks %>
+    </tbody>
+  </table>
+</section>

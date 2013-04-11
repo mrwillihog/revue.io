@@ -1,0 +1,45 @@
+body {
+  font-family: $body-font;
+  color: lighten($base-font-color, 5%);
+}
+
+a {
+  text-decoration: underline;
+  color: lighten($base-font-color, 15%);
+  &:hover {
+    text-decoration: none;
+  }
+}
+
+h1 {
+  font-weight: bold;
+  font-size: 2em;
+  margin: $default-margin 0;
+  color: $base-font-color;
+}
+
+h2 {
+  font-weight: bold;
+  font-size: 1.3em;
+  margin-bottom: $default-margin;
+  color: $base-font-color;
+}
+
+pre {
+  font-family: $fixed-width-font;
+}
+
+table {
+  font-family: $fixed-width-font;
+}
+
+strong {
+  font-weight: bold;
+}
+
+header {
+  .strap {
+    font-family: $fixed-width-font;
+    font-weight: bold;
+  }
+}

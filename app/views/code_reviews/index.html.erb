@@ -1,0 +1,35 @@
+<% content_for :body_class, "home" %>
+
+<div class="feature third one">
+  <h2>Online diff tool</h2>
+  <p>
+    revue is an online tool for viewing diff files that can be used to aid in <strong>code reviews</strong>.
+  </p>
+  <p>
+    Each diff is given a secure token to keep it private and is <strong>deleted automatically</strong> after 6 hours.
+  </p>
+  <p>
+    To begin using it, paste in a diff file and hit upload. Alternatively, check out the <%= link_to_revue_gem %> for <strong>command line access</strong>.
+  </p>
+  <a href=""></a>
+</div>
+<div class="feature third two">
+  <h2>Create a review</h2>
+  <%= form_for @review do |f| %>
+    <%= f.text_area :raw, value: @example.raw.lines.first(7).join  %>
+    <%= f.submit "Upload diff", id: "upload", class: "btn btn-large" %>
+  <% end %>
+</div>
+<div class="feature third three">
+  <h2>Command line access</h2>
+  <p>
+    Copying &amp; pasting diff files gets boring pretty quickly. So why not <%= link_to_revue_gem "download the revue gem" %> and create reviews direct from the command line?
+  </p>
+  <pre>
+    <strong>$</strong> gem install revue
+    <strong>$</strong> svn diff | revue
+    https://revue.io/&lt;token&gt;
+  </pre>
+  <%= link_to_revue_gem "Download gem", class: "btn btn-large btn-block" %>
+</div>
+<%= render partial: 'diffs/diff', collection: @example.diffs %>
