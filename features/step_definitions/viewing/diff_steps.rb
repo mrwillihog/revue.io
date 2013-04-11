@@ -38,6 +38,6 @@ Then(/^the diff bar should be more green than red$/) do
 end
 
 Then(/^I should see the expiry date$/) do
-  page.find('.expiry').should have_content('6 hours')
+  page.find('.info').should have_content('6 hours')
 end
 
