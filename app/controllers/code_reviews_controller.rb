@@ -6,6 +6,10 @@ class CodeReviewsController < ApplicationController
   def show
     @review = CodeReview.not_expired.find_by_token(params[:id])
     sleep 0.5 and raise ActiveRecord::RecordNotFound if @review.nil?
+    respond_to do |format|
+      format.html
+      format.diff { render text: @review.raw }
+    end
   end
   def create
     @review = CodeReview.new(params[:code_review])

@@ -14,10 +14,10 @@ body {
 
 header.brand {
   h1 {
-    @include span-columns(2);
+    @include span-columns(1);
   }
-  .expiry {
-    @include span-columns(2 omega);
+  .info {
+    @include span-columns(3 omega);
     text-align: right;
     margin: $grid-padding 0;
     margin-top: $grid-padding * 2.6;
