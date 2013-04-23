@@ -1,19 +1,18 @@
 class CodeReview < ActiveRecord::Base
-  DIFF_PATTERN = /^(--- .*?)(?=^index|^diff --git|\Z)/mi
+  SPLIT_DIFFS = /^(--- .*?)(?=^index|^diff --git|\Z)/mi
+
   attr_accessible :raw, :token
 
   before_create :generate_hash, :set_expires_at
-  before_validation :remove_carriage_returns
 
   scope :expired, lambda { where("expires_at < ?", Time.now) }
   scope :not_expired, lambda { where("expires_at >= ?",  Time.now) }
 
-  validates :raw, format: { with: /^---\s.*?$\n^\+\+\+\s.*?$\n^@@.*?@@$(\n(^-|^\+|^\s).*?)+$/,
-                            message: "content is invalid" }
+  validate :validate_diff
 
   def diffs
     # Scan raw text for separate diffs and map to an array containing Diff objects
-    @diffs ||= raw.scan(DIFF_PATTERN).map { |c| Revue::Diff.new(c[0]) }
+    @diffs ||= raw.scan(SPLIT_DIFFS).map { |c| Unified::Diff.parse!(c[0]) }
   end
 
   def to_param
@@ -26,8 +25,13 @@ class CodeReview < ActiveRecord::Base
 
 private
 
-  def remove_carriage_returns
-    self.raw.gsub! "\r", ""
+  def validate_diff
+    begin
+      diffs
+      raise Unified::ParseError if diffs.empty?
+    rescue Unified::ParseError => e
+      errors.add(:raw, e.message)
+    end
   end
 
   def generate_hash

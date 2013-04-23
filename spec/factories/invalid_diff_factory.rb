@@ -1,4 +1,3 @@
-require 'revue/diff'
 
 def read_diff_file(filename)
   IO.read(File.expand_path("../diffs/#{filename}", __FILE__))

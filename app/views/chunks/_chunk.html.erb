@@ -3,10 +3,10 @@
   <td class="line_number modified"><%= "..." if chunk.modified_line_number > 1 %></td>
   <td class="line_content chunk_header"><%= chunk.header %></td>
 </tr>
-<% chunk.lines.each do |line| %>
+<% chunk.each_line do |line, original_line_number, modified_line_number| %>
   <tr class="line <%= "addition" if line.addition? %><%= "deletion" if line.deletion? %>">
-    <td class="line_number original"><%= line.original_line_number %></td>
-    <td class="line_number modified"><%= line.modified_line_number %></td>
-    <td class="line_content"><%= line.raw %></td>
+    <td class="line_number original"><%= original_line_number %></td>
+    <td class="line_number modified"><%= modified_line_number %></td>
+    <td class="line_content"><%= line %></td>
   </tr>
 <% end -%>

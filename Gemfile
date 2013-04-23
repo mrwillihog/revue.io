@@ -8,10 +8,7 @@ group :assets do
   gem 'susy'
   gem 'coffee-rails', '~> 3.2.1'
   gem 'uglifier', '>= 1.0.3'
-  gem "flat-ui-rails"
 end
-
-gem 'jquery-rails'
 
 # Setup testing framework
 group :development, :test do
@@ -34,6 +31,5 @@ group :production do
 end
 
 gem 'capistrano'
-gem 'carrierwave'
 gem 'whenever'
-gem 'rabl'
+gem 'unified'
