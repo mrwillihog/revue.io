@@ -33,3 +33,4 @@ end
 gem 'capistrano'
 gem 'whenever'
 gem 'unified'
+gem 'statsd-ruby'
