@@ -65,6 +65,6 @@ RevueIo::Application.configure do
   # with SQLite, MySQL, and PostgreSQL)
   # config.active_record.auto_explain_threshold_in_seconds = 0.5
 
-  config.statsd.host = "198.199.67.216"
-  config.stasd.port = 8125
+  config.statsd_host = "198.199.67.216"
+  config.statsd_port = 8125
 end
