@@ -21,6 +21,10 @@ class Stats
     client.timing(*args) if record_stats?
   end
 
+  def self.time(*args, &block)
+    client.time(*args, &block) if record_stats?
+  end
+
   def self.client
     @@client ||= begin
       client = Statsd.new(Rails.application.config.statsd_host, Rails.application.config.statsd_port)
