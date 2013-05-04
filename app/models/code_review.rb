@@ -61,6 +61,7 @@ private
     Stats.count "lines.additions", self.number_of_added_lines
     Stats.count "lines.deletions", self.number_of_deleted_lines
     Stats.count "lines.unchanged", self.number_of_unchanged_lines
+    Stats.gauge "reviews.total", CodeReview.count
   end
 
   def set_expires_at
