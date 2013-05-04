@@ -1,3 +1,5 @@
+require "statsd"
+
 class Stats
   def self.record_stats?
     Rails.env == "production"
@@ -11,13 +13,17 @@ class Stats
     client.decrement(*args) if record_stats?
   end
 
+  def self.count(*args)
+    client.count(*args) if record_stats?
+  end
+
   def self.timing(*args)
     client.timing(*args) if record_stats?
   end
 
   def self.client
     @@client ||= begin
-      client = Statsd.new(Rails.application.config.stasd_host, Rails.application.config.statsd_port)
+      client = Statsd.new(Rails.application.config.statsd_host, Rails.application.config.statsd_port)
       client.namespace = "revue"
       client
     end

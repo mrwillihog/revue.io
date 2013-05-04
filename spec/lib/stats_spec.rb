@@ -26,9 +26,11 @@ describe Stats do
     client.should_receive(:increment).exactly(2).times
     client.should_receive(:decrement).exactly(1).times
     client.should_receive(:timing).exactly(1).times
+    client.should_receive(:count).exactly(1).times
     Stats.increment "test"
     Stats.increment "test"
     Stats.decrement "test"
     Stats.timing "test"
+    Stats.count "test", 4
   end
 end
