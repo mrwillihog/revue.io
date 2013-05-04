@@ -17,7 +17,7 @@ class Stats
     client.count(*args) if record_stats?
   end
 
-  def gauge(*args)
+  def self.gauge(*args)
     client.gauge(*args) if record_stats?
   end
 
