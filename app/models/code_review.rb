@@ -4,6 +4,7 @@ class CodeReview < ActiveRecord::Base
   attr_accessible :raw, :token
 
   before_create :generate_hash, :set_expires_at
+  after_create :send_statistics
 
   scope :expired, lambda { where("expires_at < ?", Time.now) }
   scope :not_expired, lambda { where("expires_at >= ?",  Time.now) }
@@ -13,6 +14,18 @@ class CodeReview < ActiveRecord::Base
   def diffs
     # Scan raw text for separate diffs and map to an array containing Diff objects
     @diffs ||= raw.scan(SPLIT_DIFFS).map { |c| Unified::Diff.parse!(c[0]) }
+  end
+
+  def number_of_added_lines
+    diffs.inject(0) {|total, diff| total += diff.number_of_added_lines}
+  end
+
+  def number_of_deleted_lines
+    diffs.inject(0) {|total, diff| total += diff.number_of_deleted_lines}
+  end
+
+  def number_of_unchanged_lines
+    diffs.inject(0) {|total, diff| total += diff.number_of_unchanged_lines}
   end
 
   def to_param
@@ -39,6 +52,13 @@ private
       random_token = SecureRandom.urlsafe_base64
       break random_token unless CodeReview.where(token: random_token).exists?
     end
+  end
+
+  def send_statistics
+    Stats.increment "reviews.new"
+    Stats.count "lines.additions", self.number_of_added_lines
+    Stats.count "lines.deletions", self.number_of_deleted_lines
+    Stats.count "lines.unchanged", self.number_of_unchanged_lines
   end
 
   def set_expires_at
