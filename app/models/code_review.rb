@@ -13,7 +13,9 @@ class CodeReview < ActiveRecord::Base
 
   def diffs
     # Scan raw text for separate diffs and map to an array containing Diff objects
-    @diffs ||= raw.scan(SPLIT_DIFFS).map { |c| Unified::Diff.parse!(c[0]) }
+    Stats.time("times.parsing") do
+      @diffs ||= raw.scan(SPLIT_DIFFS).map { |c| Unified::Diff.parse!(c[0]) }
+    end
   end
 
   def number_of_added_lines
