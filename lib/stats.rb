@@ -16,6 +16,10 @@ class Stats
   end
 
   def self.client
-    @@client ||= Statsd.new '198.0.0.0'
+    @@client ||= begin
+      client = Statsd.new(Rails.application.config.stasd_host, Rails.application.config.statsd_port)
+      client.namespace = "revue"
+      client
+    end
   end
 end

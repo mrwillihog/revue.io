@@ -3,7 +3,7 @@ require "stats"
 
 describe Stats do
   before(:each) do
-    Rails ||= double("Rails")
+    Rails ||= double("Rails").as_null_object
   end
 
   it "exists" do
