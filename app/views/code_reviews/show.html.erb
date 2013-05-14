@@ -4,7 +4,6 @@
     <strong>Expires:</strong>
     in <%= time_ago_in_words @review.expires_at %>
     | <%= link_to "raw", code_review_path(@review, format: :diff) %>
-    | <%= link_to "download patch", code_review_path(@review, format: :patch) %>
   </div>
 <% end -%>
 <%= render partial: 'diffs/diff', collection: @review.diffs %>

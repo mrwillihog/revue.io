@@ -8,9 +8,8 @@ class CodeReviewsController < ApplicationController
     sleep 0.5 and raise ActiveRecord::RecordNotFound if @review.nil?
     respond_to do |format|
       format.html
-      format.diff { render text: @review.raw }
-      format.patch {
-        #Headers instruct browser to download and not view
+      format.diff {
+        # Headers instruct browser to download and not view
         response.headers['Content-Disposition'] = "attachment; filename=\"revue-#{@review.token}.patch\""
         response.headers['Content-Type'] = 'application/force-download"'
         response.headers['Content-Transfer-Encoding'] = 'binary'
