@@ -9,6 +9,13 @@ class CodeReviewsController < ApplicationController
     respond_to do |format|
       format.html
       format.diff { render text: @review.raw }
+      format.patch {
+        #Headers instruct browser to download and not view
+        response.headers['Content-Disposition'] = "attachment; filename=\"revue-#{@review.object_id}.patch\""
+        response.headers['Content-Type'] = 'application/force-download"'
+        response.headers['Content-Transfer-Encoding'] = 'binary'
+        render text: @review.raw
+      }
     end
   end
   def create
