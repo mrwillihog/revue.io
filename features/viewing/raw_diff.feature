@@ -16,4 +16,4 @@ Feature: viewing raw diff
     Given a simple review
     When I am reviewing it
     And I click the raw download link
-    Then I should see the original diff
+    Then I should download the original diff as a patch
