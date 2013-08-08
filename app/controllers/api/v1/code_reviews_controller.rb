@@ -16,11 +16,10 @@ module Api
       def show
         @review = CodeReview.not_expired.find_by_token! params[:id]
         sleep 0.5 and raise ActiveRecord::RecordNotFound if @review.nil?
-        if params[:callback]
-          format.js { render :json => {:content => @review.raw}, :callback => params[:callback] }
-        else
-          format.json { render json: {:content => @review.raw}}
-        end
+        render json: {
+            :content => @review.raw,
+            :expires_at => @review.expires_at
+        }
       end
     end
   end
