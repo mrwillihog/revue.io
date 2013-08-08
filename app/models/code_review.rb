@@ -1,5 +1,5 @@
 class CodeReview < ActiveRecord::Base
-  SPLIT_DIFFS = /^(--- .*?)(?=^index|^diff --git|\Z)/mi
+  SPLIT_DIFFS = /^(--- .*?)(?=^index|^diff --git|^--- |\Z)/mi
 
   attr_accessible :raw, :token
 
@@ -13,9 +13,7 @@ class CodeReview < ActiveRecord::Base
 
   def diffs
     # Scan raw text for separate diffs and map to an array containing Diff objects
-    Stats.time("times.parsing") do
-      @diffs ||= raw.scan(SPLIT_DIFFS).map { |c| Unified::Diff.parse!(c[0]) }
-    end
+    @diffs ||= raw.scan(SPLIT_DIFFS).map { |c| Unified::Diff.parse!(c[0]) }
   end
 
   def number_of_added_lines
@@ -52,7 +50,7 @@ private
   def generate_hash
     self.token = loop do
       random_token = SecureRandom.urlsafe_base64
-      break random_token unless CodeReview.where(token: random_token).exists?
+      break random_token unless CodeReview.where(:token => random_token).exists?
     end
   end
 

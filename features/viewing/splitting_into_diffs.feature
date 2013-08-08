@@ -26,3 +26,12 @@ Feature: Splitting a code review into multiple diffs
     And I should see 16 chunks
     And I should see 36 additions
     And I should see 77 deletions
+
+  Scenario: A filtered svn diff
+
+    Working in SVN branches will introduce property change information into the diff output. These can be removed
+    using a tool called filterdiff. However, this also removes the Index information.
+
+    Given a filtered svn review
+    When I am reviewing it
+    Then I should see 2 diff sections
