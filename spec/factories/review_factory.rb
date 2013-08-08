@@ -44,5 +44,9 @@ FactoryGirl.define do
     factory :git do |f|
       f.raw read_diff_file "git.diff"
     end
+
+    factory :filtered_svn do |f|
+      f.raw read_diff_file "filtered.diff"
+    end
   end
 end
