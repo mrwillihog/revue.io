@@ -30,7 +30,7 @@ group :production do
   gem 'unicorn'
 end
 
-gem 'capistrano'
+gem 'capistrano', "2.15.5"
 gem 'whenever'
 gem 'unified'
 gem 'statsd-ruby'
